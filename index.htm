@@ -1,0 +1,2485 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Çiftlik Hırsızı Tavşan: Gece Macerası</title>
+
+<style>
+:root {
+    --bg-color: #E8F5E9;
+    --text-color: #4CAF50;
+    --title-color: #2E7D32;
+    --panel-bg: rgba(255,255,255,.75);
+    --border-color: #8D6E63;
+}
+
+body.night-mode {
+    --bg-color: #121820;
+    --text-color: #81C784;
+    --title-color: #A5D6A7;
+    --panel-bg: rgba(20,30,40,.85);
+    --border-color: #3E2723;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 8px 8px 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--bg-color);
+    color: var(--text-color);
+
+    font-family: "Segoe UI", Tahoma, sans-serif;
+
+    overflow: hidden;
+    touch-action: none;
+
+    transition:
+        background-color 1.5s ease,
+        color 1.5s ease;
+}
+
+h1 {
+    margin: 0 0 2px;
+    color: var(--title-color);
+    font-size: clamp(18px, 5vw, 24px);
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,.2);
+}
+
+.description {
+    margin: 0 0 7px;
+    max-width: 95vw;
+    font-size: 12px;
+    text-align: center;
+}
+
+.farm-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scenery {
+    position: absolute;
+    z-index: -1;
+    font-size: 30px;
+    user-select: none;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,.15));
+    transition: filter 1.5s ease;
+}
+
+body.night-mode .scenery {
+    filter:
+        drop-shadow(0 4px 4px rgba(0,0,0,.8))
+        brightness(.4);
+}
+
+.tree1 {
+    top: -20px;
+    left: -27px;
+}
+
+.tree2 {
+    bottom: -10px;
+    right: -32px;
+    font-size: 40px;
+}
+
+.house {
+    top: -25px;
+    right: -25px;
+    font-size: 35px;
+}
+
+.tractor {
+    bottom: -10px;
+    left: -27px;
+}
+
+canvas {
+    display: block;
+
+    width: min(90vw, 400px);
+    height: min(90vw, 400px);
+
+    border: 8px solid var(--border-color);
+    border-radius: 8px;
+
+    background: #C8E6C9;
+
+    box-shadow: 0 10px 25px rgba(0,0,0,.3);
+
+    transition: border-color 1.5s ease;
+}
+
+#scoreBoard {
+    margin-top: 7px;
+    padding: 7px 18px;
+
+    min-width: 230px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    background: var(--panel-bg);
+    border-radius: 20px;
+
+    box-shadow: 0 4px 10px rgba(0,0,0,.12);
+
+    transition: background 1.5s ease;
+}
+
+.score-row {
+    display: flex;
+    gap: 20px;
+
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#highScoreText {
+    color: #D84315;
+}
+
+body.night-mode #highScoreText {
+    color: #FF8A65;
+}
+
+#levelTitle {
+    margin-top: 4px;
+    font-size: 13px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+#statusEffect {
+    height: 19px;
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.chili-alert {
+    color: #D32F2F;
+    animation: shake .5s infinite;
+}
+
+.gold-alert {
+    color: #FBC02D;
+    text-shadow: 0 0 5px #FDD835;
+}
+
+#mobileControls {
+    margin-top: 5px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.control-row {
+    display: flex;
+    gap: 20px;
+}
+
+.control-btn {
+    width: 48px;
+    height: 48px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 14px;
+
+    background: #81C784;
+    color: white;
+
+    font-size: 21px;
+
+    box-shadow: 0 4px 0 #4CAF50;
+
+    cursor: pointer;
+    user-select: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    touch-action: manipulation;
+}
+
+body.night-mode .control-btn {
+    background: #455A64;
+    box-shadow: 0 4px 0 #263238;
+}
+
+.control-btn:active {
+    transform: translateY(4px);
+    box-shadow: none !important;
+}
+
+body.inverted {
+    box-shadow: inset 0 0 60px rgba(255,0,0,.45);
+}
+
+/* OVERLAY */
+
+.overlay-screen {
+    position: fixed;
+    inset: 0;
+
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1000;
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+#gameOverScreen {
+    background: rgba(239,154,154,.95);
+}
+
+#hugScreen {
+    background: rgba(200,230,201,.96);
+}
+
+#sleepScreen {
+    background: rgba(20,20,35,.96);
+    color: white;
+}
+
+.popup-content {
+    max-width: 90vw;
+    padding: 20px;
+
+    text-align: center;
+
+    animation: popIn .55s
+        cubic-bezier(.175,.885,.32,1.275);
+}
+
+.giant-emoji {
+    margin: 0;
+    font-size: 76px;
+    line-height: 1.2;
+    text-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+.popup-text {
+    margin-top: 15px;
+    color: #3E2723;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.sleep-text {
+    margin-top: 15px;
+    color: #A5B1C2;
+    font-size: 20px;
+    font-style: italic;
+}
+
+.black-rabbit {
+    display: inline-block;
+    filter: grayscale(1) brightness(.2);
+}
+
+.action-btn {
+    margin-top: 25px;
+    padding: 12px 30px;
+
+    border: none;
+    border-radius: 30px;
+
+    background: #66BB6A;
+    color: white;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.action-btn:active {
+    transform: translateY(2px);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    0%,100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-2px);
+    }
+
+    75% {
+        transform: translateX(2px);
+    }
+}
+
+/* Küçük ekranlar */
+
+@media (max-height: 650px) {
+    body {
+        justify-content: flex-start;
+        padding-top: 4px;
+    }
+
+    h1 {
+        font-size: 18px;
+    }
+
+    .description {
+        font-size: 11px;
+        margin-bottom: 3px;
+    }
+
+    canvas {
+        width: min(72vh, 400px);
+        height: min(72vh, 400px);
+    }
+
+    #scoreBoard {
+        margin-top: 3px;
+        padding: 4px 15px;
+    }
+
+    #mobileControls {
+        margin-top: 2px;
+    }
+
+    .control-btn {
+        width: 42px;
+        height: 42px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Çiftlik Hırsızı Tavşan 🐰</h1>
+
+<p class="description">
+    Dikkat! Gece olunca Karabaş uyanır. Engellere 🪵 takılma!
+</p>
+
+<div class="farm-container">
+
+    <div class="scenery tree1">🌳</div>
+    <div class="scenery house">🏡</div>
+
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <div class="scenery tractor">🚜</div>
+    <div class="scenery tree2">🌲</div>
+
+</div>
+
+<div id="scoreBoard">
+
+    <div class="score-row">
+        <div id="score">Skor: 0</div>
+        <div id="highScoreText">🏆 Rekor: 0</div>
+    </div>
+
+    <div id="levelTitle">
+        Seviye: Melek Tavşan 😇
+    </div>
+
+    <div id="statusEffect"></div>
+
+</div>
+
+<div id="mobileControls">
+
+    <button class="control-btn" id="btn-up">🐾</button>
+
+    <div class="control-row">
+        <button class="control-btn" id="btn-left">🐾</button>
+        <button class="control-btn" id="btn-down">☁️</button>
+        <button class="control-btn" id="btn-right">🐾</button>
+    </div>
+
+</div>
+
+
+<!-- OYUN BİTTİ -->
+
+<div id="gameOverScreen" class="overlay-screen">
+
+    <div class="popup-content">
+
+        <div class="giant-emoji">😭🐰</div>
+
+        <div class="popup-text" id="deathReason">
+            Eyvah!<br>
+            <span style="font-size:16px;">
+                Yakalandın.
+            </span>
+        </div>
+
+        <button class="action-btn" id="restartDeath">
+            Tekrar Dene
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- KAZANMA -->
+
+<div id="hugScreen" class="overlay-screen">
+
+    <div class="popup-content">
+
+        <div class="giant-emoji">😈🐰</div>
+
+        <div class="popup-text">
+            Muazzam!<br>
+            Çiftliğin En Yaramaz Tavşanı Oldun!
+        </div>
+
+        <button class="action-btn" id="restartWin">
+            Yeniden Oyna
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- UYKU -->
+
+<div id="sleepScreen" class="overlay-screen">
+
+    <div class="popup-content">
+
+        <div class="giant-emoji">
+            🐇💤
+            <span class="black-rabbit">🐇</span>
+        </div>
+
+        <div class="sleep-text">
+            (evet uyku vakti)
+        </div>
+
+        <button
+            class="action-btn"
+            id="restartSleep"
+            style="background:#576574;">
+            Uyan ve Oyna
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+"use strict";
+
+/* =========================================================
+   TEMEL AYARLAR
+========================================================= */
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const GRID_SIZE = 20;
+const TILE_COUNT = canvas.width / GRID_SIZE;
+
+const standardFoods = ["🥕", "🥬", "🥗", "🍅"];
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const scoreElement = document.getElementById("score");
+const highScoreElement = document.getElementById("highScoreText");
+const levelElement = document.getElementById("levelTitle");
+const statusElement = document.getElementById("statusEffect");
+
+const gameOverScreen = document.getElementById("gameOverScreen");
+const hugScreen = document.getElementById("hugScreen");
+const sleepScreen = document.getElementById("sleepScreen");
+const deathReason = document.getElementById("deathReason");
+
+
+/* =========================================================
+   OYUN DEĞİŞKENLERİ
+========================================================= */
+
+let rabbit = [];
+let obstacles = [];
+
+let food = {
+    x: 5,
+    y: 5,
+    emoji: "🥕",
+    type: "normal"
+};
+
+let hole = {
+    active: false,
+    x: -1,
+    y: -1,
+    emoji: "🕳️"
+};
+
+let dx = 0;
+let dy = 0;
+
+let nextDx = 0;
+let nextDy = 0;
+
+let score = 0;
+
+let speed = 160;
+
+let gameRunning = false;
+let gameAnimationId = null;
+
+let lastTime = 0;
+let accumulator = 0;
+
+let isNight = false;
+
+let isInverted = false;
+let invertTimer = 0;
+
+let isInvincible = false;
+let invincibleTimer = 0;
+
+
+/* =========================================================
+   DÜŞMANLAR
+========================================================= */
+
+const halil = {
+    realX: 18,
+    realY: 18,
+    prevX: 18,
+    prevY: 18,
+    emoji: "🤬",
+    speechTimer: 0
+};
+
+const dog = {
+    active: false,
+    realX: 2,
+    realY: 2,
+    prevX: 2,
+    prevY: 2,
+    emoji: "🐕",
+    dx: 1,
+    dy: 1
+};
+
+
+/* =========================================================
+   REKOR
+========================================================= */
+
+let highScore = 0;
+
+try {
+    highScore = Number(
+        localStorage.getItem("rabbitHighScore") || 0
+    );
+} catch (error) {
+    highScore = 0;
+}
+
+highScoreElement.textContent =
+    "🏆 Rekor: " + highScore;
+
+
+function updateHighScore() {
+
+    if (score <= highScore) return;
+
+    highScore = score;
+
+    try {
+        localStorage.setItem(
+            "rabbitHighScore",
+            String(highScore)
+        );
+    } catch (error) {
+        /* localStorage kullanılamıyorsa oyun yine devam eder */
+    }
+
+    highScoreElement.textContent =
+        "🏆 Rekor: " + highScore;
+}
+
+
+/* =========================================================
+   SKOR / SEVİYE
+========================================================= */
+
+function updateScore() {
+
+    scoreElement.textContent =
+        "Skor: " + score;
+
+    updateHighScore();
+}
+
+
+function checkLevel() {
+
+    let title = "Melek Tavşan 😇";
+
+    if (score >= 100) {
+        title = "Yaramaz Tavşan 😈";
+    }
+    else if (score >= 80) {
+        title = "Çılgın Tavşan 🤪";
+    }
+    else if (score >= 60) {
+        title = "Afacan Tavşan 😼";
+    }
+    else if (score >= 40) {
+        title = "Akıllı Tavşan 🤓";
+    }
+    else if (score >= 20) {
+        title = "Uslu Tavşan 🐰";
+    }
+
+    levelElement.textContent =
+        "Seviye: " + title;
+
+
+    /* 60 puan -> Gece */
+
+    if (score >= 60 && !isNight) {
+
+        isNight = true;
+
+        document.body.classList.add("night-mode");
+
+    }
+
+
+    /* 40 puan -> Karabaş */
+
+    if (score >= 40 && !dog.active) {
+
+        dog.active = true;
+
+        dog.realX = 2;
+        dog.realY = 2;
+
+        dog.prevX = 2;
+        dog.prevY = 2;
+
+        dog.dx = 1;
+        dog.dy = 1;
+
+    }
+
+
+    /* 100 puan -> kazan */
+
+    if (score >= 100) {
+
+        triggerWin();
+
+    }
+}
+
+
+/* =========================================================
+   EFEKT MESAJI
+========================================================= */
+
+function showStatus(message, className = "") {
+
+    statusElement.innerHTML =
+        `<span class="${className}">${message}</span>`;
+}
+
+
+function clearStatus() {
+
+    statusElement.innerHTML = "";
+
+}
+
+
+/* =========================================================
+   OYUNU BİTİRME
+========================================================= */
+
+function stopGame() {
+
+    gameRunning = false;
+
+    if (gameAnimationId !== null) {
+
+        cancelAnimationFrame(gameAnimationId);
+
+        gameAnimationId = null;
+
+    }
+}
+
+
+function triggerDeath(reason) {
+
+    stopGame();
+
+    updateHighScore();
+
+    deathReason.innerHTML =
+        reason;
+
+    gameOverScreen.style.display =
+        "flex";
+}
+
+
+function triggerWin() {
+
+    if (!gameRunning) return;
+
+    stopGame();
+
+    updateHighScore();
+
+    hugScreen.style.display =
+        "flex";
+}
+
+
+function triggerSleep() {
+
+    stopGame();
+
+    updateHighScore();
+
+    sleepScreen.style.display =
+        "flex";
+}
+
+
+/* =========================================================
+   ENGELLER
+========================================================= */
+
+function isOccupied(x, y) {
+
+    if (x === rabbit[0].x &&
+        y === rabbit[0].y) {
+        return true;
+    }
+
+    for (const part of rabbit) {
+
+        if (part.x === x &&
+            part.y === y) {
+            return true;
+        }
+
+    }
+
+    for (const obstacle of obstacles) {
+
+        if (obstacle.x === x &&
+            obstacle.y === y) {
+            return true;
+        }
+
+    }
+
+    return false;
+}
+
+
+function generateObstacles() {
+
+    obstacles = [];
+
+    const maxObstacles = 6;
+
+    let attempts = 0;
+
+    while (
+        obstacles.length < maxObstacles &&
+        attempts < 500
+    ) {
+
+        attempts++;
+
+        const x =
+            Math.floor(
+                Math.random() * (TILE_COUNT - 2)
+            ) + 1;
+
+        const y =
+            Math.floor(
+                Math.random() * (TILE_COUNT - 2)
+            ) + 1;
+
+
+        /* Başlangıç alanını boş bırak */
+
+        if (
+            Math.abs(x - 10) < 3 &&
+            Math.abs(y - 10) < 3
+        ) {
+            continue;
+        }
+
+
+        if (isOccupied(x, y)) {
+            continue;
+        }
+
+
+        if (
+            obstacles.some(
+                obstacle =>
+                    obstacle.x === x &&
+                    obstacle.y === y
+            )
+        ) {
+            continue;
+        }
+
+
+        obstacles.push({
+            x,
+            y,
+            emoji: "🪵"
+        });
+
+    }
+}
+
+
+/* =========================================================
+   YEMEK
+========================================================= */
+
+function placeFood() {
+
+    let placed = false;
+
+    let attempts = 0;
+
+    while (!placed && attempts < 500) {
+
+        attempts++;
+
+        const x =
+            Math.floor(
+                Math.random() * (TILE_COUNT - 2)
+            ) + 1;
+
+        const y =
+            Math.floor(
+                Math.random() * (TILE_COUNT - 2)
+            ) + 1;
+
+
+        if (isOccupied(x, y)) {
+            continue;
+        }
+
+
+        if (
+            Math.round(halil.realX) === x &&
+            Math.round(halil.realY) === y
+        ) {
+            continue;
+        }
+
+
+        food.x = x;
+        food.y = y;
+
+        placed = true;
+    }
+
+
+    if (!placed) {
+
+        food.x = 5;
+        food.y = 5;
+
+    }
+
+
+    const random =
+        Math.random();
+
+
+    if (random < 0.10) {
+
+        food.emoji = "🌟";
+        food.type = "gold";
+
+    }
+    else if (random < 0.25) {
+
+        food.emoji = "🌶️";
+        food.type = "chili";
+
+    }
+    else {
+
+        food.emoji =
+            standardFoods[
+                Math.floor(
+                    Math.random() *
+                    standardFoods.length
+                )
+            ];
+
+        food.type = "normal";
+
+    }
+
+
+    /* Delik */
+
+    hole.active =
+        Math.random() < 0.10;
+
+
+    if (!hole.active) {
+
+        hole.x = -1;
+        hole.y = -1;
+
+        return;
+
+    }
+
+
+    let holePlaced = false;
+
+    attempts = 0;
+
+    while (!holePlaced && attempts < 500) {
+
+        attempts++;
+
+        const x =
+            Math.floor(
+                Math.random() * TILE_COUNT
+            );
+
+        const y =
+            Math.floor(
+                Math.random() * TILE_COUNT
+            );
+
+
+        if (x === food.x &&
+            y === food.y) {
+            continue;
+        }
+
+
+        if (isOccupied(x, y)) {
+            continue;
+        }
+
+
+        hole.x = x;
+        hole.y = y;
+
+        holePlaced = true;
+    }
+
+
+    if (!holePlaced) {
+
+        hole.active = false;
+        hole.x = -1;
+        hole.y = -1;
+
+    }
+}
+
+
+/* =========================================================
+   HALİL
+========================================================= */
+
+function placeHalilAway() {
+
+    let placed = false;
+
+    let attempts = 0;
+
+    while (!placed && attempts < 500) {
+
+        attempts++;
+
+        const x =
+            Math.floor(
+                Math.random() * TILE_COUNT
+            );
+
+        const y =
+            Math.floor(
+                Math.random() * TILE_COUNT
+            );
+
+
+        const farEnough =
+            Math.abs(
+                x - rabbit[0].x
+            ) > 8 ||
+            Math.abs(
+                y - rabbit[0].y
+            ) > 8;
+
+
+        if (!farEnough) {
+            continue;
+        }
+
+
+        halil.realX = x;
+        halil.realY = y;
+
+        halil.prevX = x;
+        halil.prevY = y;
+
+        halil.speechTimer = 0;
+
+        placed = true;
+    }
+
+
+    if (!placed) {
+
+        halil.realX = TILE_COUNT - 2;
+        halil.realY = TILE_COUNT - 2;
+
+        halil.prevX = halil.realX;
+        halil.prevY = halil.realY;
+
+    }
+}
+
+
+/* =========================================================
+   YÖN
+========================================================= */
+
+function changeDirection(newX, newY) {
+
+    if (!gameRunning) return;
+
+
+    if (isInverted) {
+
+        newX = -newX;
+        newY = -newY;
+
+    }
+
+
+    /* İlk hareket */
+
+    if (dx === 0 && dy === 0) {
+
+        nextDx = newX;
+        nextDy = newY;
+
+        return;
+
+    }
+
+
+    /* Geri dönmeyi engelle */
+
+    if (
+        dx !== -newX ||
+        dy !== -newY
+    ) {
+
+        nextDx = newX;
+        nextDy = newY;
+
+    }
+}
+
+
+/* =========================================================
+   KLAVYE
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        const key =
+            event.key.toLowerCase();
+
+
+        if (
+            [
+                "arrowup",
+                "arrowdown",
+                "arrowleft",
+                "arrowright",
+                "w",
+                "a",
+                "s",
+                "d"
+            ].includes(key)
+        ) {
+
+            event.preventDefault();
+
+        }
+
+
+        switch (key) {
+
+            case "arrowup":
+            case "w":
+                changeDirection(0, -1);
+                break;
+
+            case "arrowdown":
+            case "s":
+                changeDirection(0, 1);
+                break;
+
+            case "arrowleft":
+            case "a":
+                changeDirection(-1, 0);
+                break;
+
+            case "arrowright":
+            case "d":
+                changeDirection(1, 0);
+                break;
+
+        }
+
+    },
+    { passive: false }
+);
+
+
+/* =========================================================
+   MOBİL KONTROLLER
+========================================================= */
+
+function addControl(id, x, y) {
+
+    const button =
+        document.getElementById(id);
+
+
+    button.addEventListener(
+        "pointerdown",
+        event => {
+
+            event.preventDefault();
+
+            changeDirection(x, y);
+
+        },
+        { passive: false }
+    );
+}
+
+
+addControl("btn-up", 0, -1);
+addControl("btn-down", 0, 1);
+addControl("btn-left", -1, 0);
+addControl("btn-right", 1, 0);
+
+
+/* =========================================================
+   GÜNCELLEME
+========================================================= */
+
+function updateLogic() {
+
+    /* Efekt süreleri */
+
+    if (invertTimer > 0) {
+
+        invertTimer--;
+
+        if (invertTimer <= 0) {
+
+            isInverted = false;
+
+            document.body.classList.remove(
+                "inverted"
+            );
+
+            clearStatus();
+
+        }
+    }
+
+
+    if (invincibleTimer > 0) {
+
+        invincibleTimer--;
+
+        if (invincibleTimer <= 0) {
+
+            isInvincible = false;
+
+            clearStatus();
+
+        }
+    }
+
+
+    dx = nextDx;
+    dy = nextDy;
+
+
+    /* Tavşan hareket etmiyorsa */
+
+    if (dx === 0 && dy === 0) {
+
+        savePreviousPositions();
+
+        return;
+
+    }
+
+
+    const oldPositions =
+        rabbit.map(part => ({
+            x: part.x,
+            y: part.y
+        }));
+
+
+    const head = {
+
+        x: rabbit[0].x + dx,
+
+        y: rabbit[0].y + dy
+
+    };
+
+
+    /* Duvar */
+
+    if (
+        head.x < 0 ||
+        head.x >= TILE_COUNT ||
+        head.y < 0 ||
+        head.y >= TILE_COUNT
+    ) {
+
+        triggerDeath(
+            "Duvara çarptın! 😭"
+        );
+
+        return;
+
+    }
+
+
+    /* Engel */
+
+    for (const obstacle of obstacles) {
+
+        if (
+            head.x === obstacle.x &&
+            head.y === obstacle.y
+        ) {
+
+            triggerDeath(
+                "Kütüklere çarptın! 🪵💥"
+            );
+
+            return;
+
+        }
+    }
+
+
+    /* Kuyruk */
+
+    if (!isInvincible) {
+
+        for (let i = 0; i < rabbit.length; i++) {
+
+            if (
+                rabbit[i].x === head.x &&
+                rabbit[i].y === head.y
+            ) {
+
+                triggerDeath(
+                    "Kendi kuyruğunu ısırdın! 🐰💫"
+                );
+
+                return;
+
+            }
+        }
+    }
+
+
+    rabbit.unshift({
+        x: head.x,
+        y: head.y,
+        prevX: oldPositions[0].x,
+        prevY: oldPositions[0].y
+    });
+
+
+    /* Delik */
+
+    if (
+        hole.active &&
+        head.x === hole.x &&
+        head.y === hole.y
+    ) {
+
+        triggerSleep();
+
+        return;
+
+    }
+
+
+    /* Yemek */
+
+    if (
+        head.x === food.x &&
+        head.y === food.y
+    ) {
+
+        if (food.type === "chili") {
+
+            isInverted = true;
+
+            invertTimer = 30;
+
+            document.body.classList.add(
+                "inverted"
+            );
+
+            showStatus(
+                "🔥 Yandım! Yönler ters döndü!",
+                "chili-alert"
+            );
+
+        }
+
+
+        if (food.type === "gold") {
+
+            isInvincible = true;
+
+            invincibleTimer = 35;
+
+            showStatus(
+                "🌟 Ölümsüz Hayalet!",
+                "gold-alert"
+            );
+
+            score += 20;
+
+        }
+
+
+        score += 10;
+
+        updateScore();
+
+
+        speed =
+            Math.max(
+                90,
+                160 - score * 0.6
+            );
+
+
+        checkLevel();
+
+
+        if (!gameRunning) return;
+
+
+        placeFood();
+
+    }
+    else {
+
+        rabbit.pop();
+
+    }
+
+
+    /* =====================================================
+       HALİL AI
+    ===================================================== */
+
+    halil.prevX = halil.realX;
+    halil.prevY = halil.realY;
+
+
+    const diffX =
+        rabbit[0].x - halil.realX;
+
+    const diffY =
+        rabbit[0].y - halil.realY;
+
+
+    const halilSpeed = 0.35;
+
+
+    if (
+        Math.abs(diffX) >
+        Math.abs(diffY)
+    ) {
+
+        halil.realX +=
+            Math.sign(diffX) *
+            halilSpeed;
+
+    }
+    else {
+
+        halil.realY +=
+            Math.sign(diffY) *
+            halilSpeed;
+
+    }
+
+
+    /* Konuşma */
+
+    if (halil.speechTimer > 0) {
+
+        halil.speechTimer--;
+
+    }
+    else if (Math.random() < 0.01) {
+
+        halil.speechTimer = 15;
+
+    }
+
+
+    /* Halil çarpması */
+
+    if (
+        !isInvincible &&
+        Math.abs(
+            halil.realX -
+            rabbit[0].x
+        ) < 0.8 &&
+        Math.abs(
+            halil.realY -
+            rabbit[0].y
+        ) < 0.8
+    ) {
+
+        score =
+            Math.max(
+                0,
+                score - 10
+            );
+
+        updateScore();
+
+        checkLevel();
+
+        placeHalilAway();
+
+        showStatus(
+            "💥 Halil vurdu! -10 Puan",
+            "chili-alert"
+        );
+
+        setTimeout(() => {
+
+            if (
+                gameRunning &&
+                !isInvincible &&
+                !isInverted
+            ) {
+
+                clearStatus();
+
+            }
+
+        }, 2000);
+
+    }
+
+
+    /* =====================================================
+       KARABAŞ
+    ===================================================== */
+
+    if (dog.active) {
+
+        dog.prevX = dog.realX;
+        dog.prevY = dog.realY;
+
+
+        const dogSpeed = 0.6;
+
+
+        dog.realX +=
+            dog.dx * dogSpeed;
+
+        dog.realY +=
+            dog.dy * dogSpeed;
+
+
+        if (
+            dog.realX <= 0 ||
+            dog.realX >= TILE_COUNT - 1
+        ) {
+
+            dog.dx *= -1;
+
+        }
+
+
+        if (
+            dog.realY <= 0 ||
+            dog.realY >= TILE_COUNT - 1
+        ) {
+
+            dog.dy *= -1;
+
+        }
+
+
+        if (
+            !isInvincible &&
+            Math.abs(
+                dog.realX -
+                rabbit[0].x
+            ) < 0.8 &&
+            Math.abs(
+                dog.realY -
+                rabbit[0].y
+            ) < 0.8
+        ) {
+
+            triggerDeath(
+                "Karabaş'a yakalandın! Hav hav! 🐕"
+            );
+
+            return;
+
+        }
+    }
+
+
+    /* Önceki pozisyonlar */
+
+    for (
+        let i = 0;
+        i < rabbit.length;
+        i++
+    ) {
+
+        if (i < oldPositions.length) {
+
+            rabbit[i].prevX =
+                oldPositions[i].x;
+
+            rabbit[i].prevY =
+                oldPositions[i].y;
+
+        }
+        else {
+
+            rabbit[i].prevX =
+                rabbit[i].x;
+
+            rabbit[i].prevY =
+                rabbit[i].y;
+
+        }
+    }
+}
+
+
+/* =========================================================
+   POZİSYON KAYDI
+========================================================= */
+
+function savePreviousPositions() {
+
+    for (const part of rabbit) {
+
+        part.prevX = part.x;
+        part.prevY = part.y;
+
+    }
+
+    halil.prevX = halil.realX;
+    halil.prevY = halil.realY;
+
+    dog.prevX = dog.realX;
+    dog.prevY = dog.realY;
+}
+
+
+/* =========================================================
+   ÇİZİM
+========================================================= */
+
+function drawEverything(progress) {
+
+    /* Arka plan */
+
+    for (
+        let row = 0;
+        row < TILE_COUNT;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < TILE_COUNT;
+            col++
+        ) {
+
+            if (isNight) {
+
+                ctx.fillStyle =
+                    (row + col) % 2 === 0
+                    ? "#2E7D32"
+                    : "#1B5E20";
+
+            }
+            else {
+
+                ctx.fillStyle =
+                    (row + col) % 2 === 0
+                    ? "#C8E6C9"
+                    : "#A5D6A7";
+
+            }
+
+            ctx.fillRect(
+                col * GRID_SIZE,
+                row * GRID_SIZE,
+                GRID_SIZE,
+                GRID_SIZE
+            );
+        }
+    }
+
+
+    /* Genel yazı ayarları */
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+
+    /* Engeller */
+
+    ctx.font = "20px Arial";
+
+    for (const obstacle of obstacles) {
+
+        ctx.fillText(
+            obstacle.emoji,
+            obstacle.x * GRID_SIZE + GRID_SIZE / 2,
+            obstacle.y * GRID_SIZE + GRID_SIZE / 2 + 2
+        );
+
+    }
+
+
+    /* Delik */
+
+    if (hole.active) {
+
+        ctx.fillText(
+            hole.emoji,
+            hole.x * GRID_SIZE + GRID_SIZE / 2,
+            hole.y * GRID_SIZE + GRID_SIZE / 2 + 2
+        );
+
+    }
+
+
+    /* Yemek */
+
+    const foodX =
+        food.x * GRID_SIZE +
+        GRID_SIZE / 2;
+
+    const foodY =
+        food.y * GRID_SIZE +
+        GRID_SIZE / 2;
+
+
+    ctx.font =
+        food.type === "gold"
+        ? "22px Arial"
+        : "18px Arial";
+
+
+    ctx.fillText(
+        food.emoji,
+        foodX,
+        foodY + 2
+    );
+
+
+    /* =====================================================
+       HALİL
+    ===================================================== */
+
+    const halilX =
+        (
+            halil.prevX +
+            (
+                halil.realX -
+                halil.prevX
+            ) * progress
+        ) *
+        GRID_SIZE +
+        GRID_SIZE / 2;
+
+
+    const halilY =
+        (
+            halil.prevY +
+            (
+                halil.realY -
+                halil.prevY
+            ) * progress
+        ) *
+        GRID_SIZE +
+        GRID_SIZE / 2;
+
+
+    ctx.font = "22px Arial";
+
+    ctx.fillText(
+        halil.emoji,
+        halilX,
+        halilY + 2
+    );
+
+
+    /* Halil konuşması */
+
+    if (halil.speechTimer > 0) {
+
+        const text =
+            "bu tavşanı yakalamam gerek!!";
+
+        ctx.font = "11px Arial";
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "white";
+
+        ctx.strokeText(
+            text,
+            halilX,
+            halilY - 15
+        );
+
+        ctx.fillStyle = "#D84315";
+
+        ctx.fillText(
+            text,
+            halilX,
+            halilY - 15
+        );
+
+    }
+
+
+    /* =====================================================
+       KARABAŞ
+    ===================================================== */
+
+    if (dog.active) {
+
+        const dogX =
+            (
+                dog.prevX +
+                (
+                    dog.realX -
+                    dog.prevX
+                ) * progress
+            ) *
+            GRID_SIZE +
+            GRID_SIZE / 2;
+
+
+        const dogY =
+            (
+                dog.prevY +
+                (
+                    dog.realY -
+                    dog.prevY
+                ) * progress
+            ) *
+            GRID_SIZE +
+            GRID_SIZE / 2;
+
+
+        ctx.font = "20px Arial";
+
+        ctx.save();
+
+        ctx.translate(
+            dogX,
+            dogY + 2
+        );
+
+        if (dog.dx < 0) {
+
+            ctx.scale(-1, 1);
+
+        }
+
+        ctx.fillText(
+            dog.emoji,
+            0,
+            0
+        );
+
+        ctx.restore();
+
+    }
+
+
+    /* =====================================================
+       TAVŞAN
+    ===================================================== */
+
+    let headX = 0;
+    let headY = 0;
+
+
+    for (
+        let i = rabbit.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const part = rabbit[i];
+
+
+        const rabbitX =
+            (
+                part.prevX +
+                (
+                    part.x -
+                    part.prevX
+                ) * progress
+            ) *
+            GRID_SIZE +
+            GRID_SIZE / 2;
+
+
+        const rabbitY =
+            (
+                part.prevY +
+                (
+                    part.y -
+                    part.prevY
+                ) * progress
+            ) *
+            GRID_SIZE +
+            GRID_SIZE / 2;
+
+
+        if (i === 0) {
+
+            headX = rabbitX;
+            headY = rabbitY;
+
+        }
+
+
+        ctx.globalAlpha =
+            isInvincible
+            ? 0.6
+            : 1;
+
+
+        /* Kafa */
+
+        if (i === 0) {
+
+            ctx.fillStyle =
+                isInvincible
+                ? "#FFF9C4"
+                : "#FFFFFF";
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                rabbitX,
+                rabbitY,
+                9,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            /* Kulaklar */
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                rabbitX - 4,
+                rabbitY - 7,
+                3,
+                7,
+                -.2,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.ellipse(
+                rabbitX + 4,
+                rabbitY - 7,
+                3,
+                7,
+                .2,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            /* Kulak içleri */
+
+            ctx.fillStyle = "#FFB6C1";
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                rabbitX - 4,
+                rabbitY - 7,
+                1.5,
+                5,
+                -.2,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.ellipse(
+                rabbitX + 4,
+                rabbitY - 7,
+                1.5,
+                5,
+                .2,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            /* Gözler */
+
+            ctx.fillStyle =
+                isInverted
+                ? "#D32F2F"
+                : "#333333";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                rabbitX - 3,
+                rabbitY - 1,
+                1.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.arc(
+                rabbitX + 3,
+                rabbitY - 1,
+                1.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            /* Burun */
+
+            ctx.fillStyle = "#FF69B4";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                rabbitX,
+                rabbitY + 2.5,
+                1.5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        }
+
+
+        /* Gövde */
+
+        else {
+
+            const gradient =
+                ctx.createRadialGradient(
+                    rabbitX - 2,
+                    rabbitY - 2,
+                    1,
+                    rabbitX,
+                    rabbitY,
+                    7
+                );
+
+
+            gradient.addColorStop(
+                0,
+                isInvincible
+                ? "#FFF9C4"
+                : "#FFFFFF"
+            );
+
+            gradient.addColorStop(
+                1,
+                isInvincible
+                ? "#FFF59D"
+                : "#E0E0E0"
+            );
+
+
+            ctx.fillStyle = gradient;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                rabbitX,
+                rabbitY,
+                7,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        }
+
+
+        ctx.globalAlpha = 1;
+
+    }
+
+
+    /* =====================================================
+       GECE GÖRÜŞÜ
+    ===================================================== */
+
+    if (isNight) {
+
+        /* Önce ekranı karart */
+
+        ctx.save();
+
+        ctx.fillStyle =
+            "rgba(0,0,0,.85)";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        /* Tavşanın etrafını aydınlat */
+
+        ctx.globalCompositeOperation =
+            "destination-out";
+
+
+        const radius =
+            isInvincible
+            ? 125
+            : 82;
+
+
+        const gradient =
+            ctx.createRadialGradient(
+                headX,
+                headY,
+                10,
+                headX,
+                headY,
+                radius
+            );
+
+
+        gradient.addColorStop(
+            0,
+            "rgba(0,0,0,1)"
+        );
+
+        gradient.addColorStop(
+            .65,
+            "rgba(0,0,0,.7)"
+        );
+
+        gradient.addColorStop(
+            1,
+            "rgba(0,0,0,0)"
+        );
+
+
+        ctx.fillStyle = gradient;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            headX,
+            headY,
+            radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+
+        ctx.restore();
+
+        ctx.globalCompositeOperation =
+            "source-over";
+
+    }
+}
+
+
+/* =========================================================
+   OYUN DÖNGÜSÜ
+========================================================= */
+
+function gameLoop(timestamp) {
+
+    if (!gameRunning) {
+        return;
+    }
+
+
+    if (!lastTime) {
+        lastTime = timestamp;
+    }
+
+
+    let delta =
+        timestamp - lastTime;
+
+
+    lastTime = timestamp;
+
+
+    /* Sekme değiştirildiğinde aşırı zaman birikmesini engelle */
+
+    if (delta > 250) {
+        delta = 250;
+    }
+
+
+    accumulator += delta;
+
+
+    while (
+        accumulator >= speed &&
+        gameRunning
+    ) {
+
+        updateLogic();
+
+        accumulator -= speed;
+
+    }
+
+
+    if (gameRunning) {
+
+        const progress =
+            speed > 0
+            ? accumulator / speed
+            : 0;
+
+        drawEverything(progress);
+
+    }
+
+
+    gameAnimationId =
+        requestAnimationFrame(
+            gameLoop
+        );
+}
+
+
+/* =========================================================
+   OYUNU BAŞLAT
+========================================================= */
+
+function startGame() {
+
+    if (gameAnimationId !== null) {
+
+        cancelAnimationFrame(
+            gameAnimationId
+        );
+
+    }
+
+
+    gameRunning = true;
+
+    lastTime = 0;
+
+    accumulator = 0;
+
+
+    drawEverything(0);
+
+
+    gameAnimationId =
+        requestAnimationFrame(
+            gameLoop
+        );
+}
+
+
+/* =========================================================
+   YENİDEN BAŞLAT
+========================================================= */
+
+function restartGame() {
+
+    /* Overlay'leri kapat */
+
+    gameOverScreen.style.display =
+        "none";
+
+    hugScreen.style.display =
+        "none";
+
+    sleepScreen.style.display =
+        "none";
+
+
+    /* Görünümü sıfırla */
+
+    document.body.classList.remove(
+        "night-mode"
+    );
+
+    document.body.classList.remove(
+        "inverted"
+    );
+
+
+    /* Tavşan */
+
+    rabbit = [
+        {
+            x: 10,
+            y: 10,
+            prevX: 10,
+            prevY: 10
+        }
+    ];
+
+
+    dx = 0;
+    dy = 0;
+
+    nextDx = 0;
+    nextDy = 0;
+
+
+    /* Skor */
+
+    score = 0;
+
+    speed = 160;
+
+
+    /* Efektler */
+
+    isNight = false;
+
+    isInverted = false;
+    invertTimer = 0;
+
+    isInvincible = false;
+    invincibleTimer = 0;
+
+
+    /* Köpek */
+
+    dog.active = false;
+
+    dog.realX = 2;
+    dog.realY = 2;
+
+    dog.prevX = 2;
+    dog.prevY = 2;
+
+    dog.dx = 1;
+    dog.dy = 1;
+
+
+    /* Halil */
+
+    placeHalilAway();
+
+
+    /* Dünya */
+
+    generateObstacles();
+
+    placeFood();
+
+
+    /* Arayüz */
+
+    scoreElement.textContent =
+        "Skor: 0";
+
+    levelElement.textContent =
+        "Seviye: Melek Tavşan 😇";
+
+    clearStatus();
+
+
+    startGame();
+
+}
+
+
+/* =========================================================
+   BUTONLAR
+========================================================= */
+
+document
+    .getElementById("restartDeath")
+    .addEventListener(
+        "click",
+        restartGame
+    );
+
+document
+    .getElementById("restartWin")
+    .addEventListener(
+        "click",
+        restartGame
+    );
+
+document
+    .getElementById("restartSleep")
+    .addEventListener(
+        "click",
+        restartGame
+    );
+
+
+/* =========================================================
+   İLK BAŞLANGIÇ
+========================================================= */
+
+rabbit = [
+    {
+        x: 10,
+        y: 10,
+        prevX: 10,
+        prevY: 10
+    }
+];
+
+generateObstacles();
+placeHalilAway();
+placeFood();
+
+scoreElement.textContent =
+    "Skor: 0";
+
+highScoreElement.textContent =
+    "🏆 Rekor: " + highScore;
+
+levelElement.textContent =
+    "Seviye: Melek Tavşan 😇";
+
+startGame();
+
+</script>
+
+</body>
+</html>
